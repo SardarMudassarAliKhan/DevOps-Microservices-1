@@ -42,7 +42,7 @@ pipeline {
                     def lokiAvailable = sh(script: "docker plugin ls --format '{{.Name}}' | grep -q 'loki'", returnStatus: true) == 0
                     
                     def loggingOpts = lokiAvailable ? 
-                        '--log-driver=loki --log-opt loki-url="http://130.131.46.90:3100/loki/api/v1/push" --log-opt loki-external-labels="container_name={{.Name}}"' : 
+                        '--log-driver=loki --log-opt loki-url="http://127.0.0.1:3100/loki/api/v1/push" --log-opt loki-external-labels="container_name={{.Name}}"' : 
                         '--log-driver=json-file --log-opt max-size=10m --log-opt max-file=3'
 
                     echo "Running new container with logging strategy: ${lokiAvailable ? 'Loki' : 'JSON File Fallback'}..."
