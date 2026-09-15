@@ -36,7 +36,7 @@ namespace DevOps_Microservices_1
                 app.UseSwaggerUI(options =>
                 {
                     // Points to the generated OpenAPI JSON document
-                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                    options.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1 for Microservices 1");
 
                     // Optional: To serve Swagger UI at the app's root (http://localhost:<port>/), uncomment below
                     // options.RoutePrefix = string.Empty; 
