@@ -26,7 +26,7 @@ namespace DevOps_Microservices_1
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
+            if (app.Environment.IsDevelopment() || app.Environment.IsStaging() || app.Environment.IsProduction())
             {
                 // Native .NET 10 mapping
                 app.MapOpenApi();
