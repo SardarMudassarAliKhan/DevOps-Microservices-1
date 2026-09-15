@@ -28,14 +28,14 @@ pipeline {
         stage('Push and Deploy') {
             steps {
                 script {
-                    echo 'Ensuring persistent data protection keys and uploads directories exist on host...'
-                    sh 'mkdir -p /home/ubuntu/aspnet-keys'
-                    sh 'mkdir -p /home/ubuntu/app-uploads/logos'
-                    sh 'chmod -R 777 /home/ubuntu/app-uploads'
+                    echo 'Ensuring isolated persistent data protection keys and uploads directories exist on host...'
+                    sh 'mkdir -p /home/ubuntu/microservice-1/aspnet-keys'
+                    sh 'mkdir -p /home/ubuntu/microservice-1/app-uploads/logos'
+                    sh 'chmod -R 777 /home/ubuntu/microservice-1/app-uploads'
                     
                     echo 'Stopping old active container if it exists...'
-                    sh 'docker stop ntl-oneclick-web || true'
-                    sh 'docker rm ntl-oneclick-web || true'
+                    sh 'docker stop microservice-1-web || true'
+                    sh 'docker rm microservice-1-web || true'
                     
                     echo 'Checking availability of Loki logging driver...'
                     def lokiAvailable = sh(script: "docker plugin ls --format '{{.Name}}' | grep -q 'loki'", returnStatus: true) == 0
@@ -46,15 +46,20 @@ pipeline {
 
                     echo "Running new container with logging strategy: ${lokiAvailable ? 'Loki' : 'JSON File Fallback'}..."
                     
-                    sh '''
-                        docker run -d --restart always --name ntl-oneclick-web \
-                        ''' + loggingOpts + ''' \
+                    // FIXED: 
+                    // 1. Unique container name (microservice-1-web)
+                    // 2. Isolated host paths (/home/ubuntu/microservice-1/...) to avoid overlapping with microservice-2
+                    // 3. Correct non-root home directory path (/home/app/.aspnet/DataProtection-Keys) matching USER $APP_UID
+                    // 4. Exposed on unique host port (8082)
+                    sh """
+                        docker run -d --restart always --name microservice-1-web \
+                        ${loggingOpts} \
                         --env "ASPNETCORE_ENVIRONMENT=Production" \
                         --env "ASPNETCORE_URLS=http://0.0.0.0:8080" \
-                        -v /home/ubuntu/aspnet-keys:/root/.aspnet/DataProtection-Keys \
-                        -v /home/ubuntu/app-uploads:/app/wwwroot/uploads \
+                        -v /home/ubuntu/microservice-1/aspnet-keys:/home/app/.aspnet/DataProtection-Keys \
+                        -v /home/ubuntu/microservice-1/app-uploads:/app/wwwroot/uploads \
                         --network mudassar -p 8082:8080 microservice-1:latest
-                    '''
+                    """
                 }
             }
         }
