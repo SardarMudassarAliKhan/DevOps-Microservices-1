@@ -20,7 +20,8 @@ pipeline {
                     sh 'docker rmi microservice-1:latest || true'
 
                     echo 'Building the new Docker image...'
-                    sh 'docker build --no-cache -t microservice-1:latest -f DevOps-Microservices-2/Dockerfile .'
+                    // FIXED: Path changed to DevOps-Microservices-1 to match your GitHub repository folder
+                    sh 'docker build --no-cache -t microservice-1:latest -f DevOps-Microservices-1/Dockerfile .'
                 }
             }
         }
@@ -46,11 +47,7 @@ pipeline {
 
                     echo "Running new container with logging strategy: ${lokiAvailable ? 'Loki' : 'JSON File Fallback'}..."
                     
-                    // FIXED: 
-                    // 1. Unique container name (microservice-1-web)
-                    // 2. Isolated host paths (/home/ubuntu/microservice-1/...) to avoid overlapping with microservice-2
-                    // 3. Correct non-root home directory path (/home/app/.aspnet/DataProtection-Keys) matching USER $APP_UID
-                    // 4. Exposed on unique host port (8082)
+                    // Configurations for microservice-1 isolation and non-root data protection
                     sh """
                         docker run -d --restart always --name microservice-1-web \
                         ${loggingOpts} \
